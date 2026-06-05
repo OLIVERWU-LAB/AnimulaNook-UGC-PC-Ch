@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>创建RP房</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/global.css">
+<link rel="stylesheet" href="assets/components.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <header class="top-row"></header>
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <div class="paper-board"></div>
+  </main>
+</div>
+
+<!-- 创建直播间大弹窗 -->
+<div class="modal-mask mask-60" id="maskCreate">
+  <div class="big-popup" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="history.back()">
+      <img src="assets/img/btn-close.png" alt="关闭">
+    </button>
+    <div class="big-popup-inner">
+      <div class="big-popup-title">
+        <span>创建RP房</span>
+      </div>
+
+      <div class="create-grid">
+        <div class="upload-cover-area">
+          <label class="upload-cover">
+            <div class="upload-cover-icon">
+              <div class="plus">+</div>
+              <div>上传封面</div>
+            </div>
+          </label>
+          <button class="use-template-btn" onclick="document.getElementById('maskTemplate').style.display='flex'">选择我的模板</button>
+        </div>
+
+        <div class="create-form">
+          <div class="create-form-scroll">
+            <div class="form-row">
+              <div class="form-label">标题</div>
+              <input class="form-input" placeholder="请输入标题（不超过15字）" maxlength="15">
+            </div>
+
+            <div class="form-row">
+              <div class="form-label">题材</div>
+              <div class="form-pills" data-mode="single">
+                <span class="form-pill active">日常</span>
+                <span class="form-pill">悬疑</span>
+                <span class="form-pill">古风</span>
+                <span class="form-pill">校园</span>
+                <span class="form-pill">奇幻</span>
+                <span class="form-pill">恋爱</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label">介绍</div>
+              <div class="form-textarea-wrap">
+                <textarea class="form-textarea" placeholder="请输入RP房介绍" maxlength="150" oninput="document.getElementById('introCount').textContent=this.value.length"></textarea>
+                <span class="count"><span id="introCount">0</span>/150</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label">人数</div>
+              <div class="form-select">
+                <span>请选择最大人数（1-6）</span>
+                <span class="caret"></span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label">开播时间</div>
+              <div class="form-select">
+                <span>立即开播 / 预约时间</span>
+                <span class="caret"></span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label">权限</div>
+              <div class="form-perms">
+                <span class="perm-item active"><span class="check"></span>公开</span>
+                <span class="perm-item"><span class="check"></span>仅好友可见</span>
+                <span class="perm-item"><span class="check"></span>仅自己可见</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label">角色</div>
+              <div class="role-list">
+                <div class="role-row">
+                  <div class="role-av"></div>
+                  <input class="form-input" placeholder="角色1名称" style="height:40px;">
+                  <button class="role-btn" title="编辑">✎</button>
+                  <button class="role-btn role-btn-del" title="删除">✕</button>
+                </div>
+                <div class="role-row">
+                  <div class="role-av"></div>
+                  <input class="form-input" placeholder="角色2名称" style="height:40px;">
+                  <button class="role-btn" title="编辑">✎</button>
+                  <button class="role-btn role-btn-del" title="删除">✕</button>
+                </div>
+                <button class="role-add">+ 添加角色</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="big-popup-bottombar">
+      <button class="btn-mini btn-yellow" onclick="history.back()">取消</button>
+      <button class="btn-mini btn-green" onclick="alert('已创建')">确认创建</button>
+      <span class="meta" id="saveDraft">
+        <span class="check"></span>保存为模板
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- 选择模板二级大弹窗 -->
+<div class="modal-mask mask-60" id="maskTemplate" style="display:none;">
+  <div class="big-popup" onclick="event.stopPropagation()" style="width: 1080px;">
+    <div class="big-popup-inner">
+      <div class="big-popup-title" style="justify-content: space-between; display: flex;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="back-btn" onclick="document.getElementById('maskTemplate').style.display='none'">
+            <img src="assets/img/icon-back.png" alt="返回">
+          </button>
+          <span>选择我的模板</span>
+        </div>
+      </div>
+
+      <div class="template-grid" id="tplGrid"></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/shell.js?v=33"></script>
+<script>
+renderSidebar('mine');
+renderTopRow({ showFilter: false, showSort: false, showSearch: false });
+
+// 玩法单选
+document.querySelectorAll('.form-pills[data-mode="single"] .form-pill').forEach(p => {
+  p.onclick = () => {
+    p.parentElement.querySelectorAll('.form-pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+  };
+});
+
+// 权限单选
+document.querySelectorAll('.perm-item').forEach(p => {
+  p.onclick = () => {
+    p.parentElement.querySelectorAll('.perm-item').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+  };
+});
+
+// 模板列表
+const tpls = [
+  { title: '我的悬疑模板', cover: 'assets/img/card-cover-live.png' },
+  { title: '日常聊天模板', cover: 'assets/img/card-cover-dream.png' },
+  { title: '古风诗会模板', cover: 'assets/img/card-cover-live.png' },
+  { title: '校园社团模板', cover: 'assets/img/card-cover-dream.png' },
+];
+const grid = document.getElementById('tplGrid');
+grid.innerHTML = tpls.map((t,i) => `
+  <div class="template-card" data-i="${i}">
+    <div class="template-cover" style="background-image:url(${t.cover})">
+      <button class="template-trash" data-i="${i}" title="删除">
+        <img src="assets/img/btn-close.png" alt="">
+      </button>
+    </div>
+    <div class="template-title">${t.title}</div>
+  </div>
+`).join('');
+
+// 删除模板确认
+grid.querySelectorAll('.template-trash').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    const i = btn.dataset.i;
+    showConfirm(
+      '删除模板',
+      '是否确认删除该模板，删除后将无法找回',
+      [
+        { label: '再想想', cls: 'btn-green', cb: null },
+        { label: '确认删除', cls: 'btn-red', cb: () => {
+          tpls.splice(i, 1);
+          // 重新渲染
+          grid.innerHTML = tpls.map((t,j) => `
+            <div class="template-card" data-i="${j}">
+              <div class="template-cover" style="background-image:url(${t.cover})">
+                <button class="template-trash" data-i="${j}"><img src="assets/img/btn-close.png" alt=""></button>
+              </div>
+              <div class="template-title">${t.title}</div>
+            </div>
+          `).join('');
+        }}
+      ]
+    );
+  };
+});
+
+// 选模板（点卡片本身）
+grid.addEventListener('click', (e) => {
+  const card = e.target.closest('.template-card');
+  if (!card || e.target.closest('.template-trash')) return;
+  document.getElementById('maskTemplate').style.display = 'none';
+});
+</script>
+</body>
+</html>

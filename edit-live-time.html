@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>修改开播时间</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/global.css">
+<link rel="stylesheet" href="assets/components.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <header class="top-row"></header>
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <div class="paper-board"></div>
+  </main>
+</div>
+
+<!-- 修改开播时间大弹窗 -->
+<div class="modal-mask mask-60" id="mask">
+  <div class="big-popup" onclick="event.stopPropagation()" style="width: 720px;">
+    <button class="modal-close" onclick="history.back()">
+      <img src="assets/img/btn-close.png" alt="关闭">
+    </button>
+    <div class="big-popup-inner">
+      <div class="big-popup-title">
+        <span style="font-size: var(--fs-h3);">修改开播时间</span>
+      </div>
+
+      <!-- 滚轮三联（日期 / 小时 / 分钟）-->
+      <div class="time-picker">
+        <div class="picker-col" data-col="date"></div>
+        <div class="picker-col" data-col="hour"></div>
+        <div class="picker-col" data-col="minute"></div>
+        <div class="picker-mask-top"></div>
+        <div class="picker-mask-bottom"></div>
+        <div class="picker-center-line"></div>
+      </div>
+
+      <div class="time-current">
+        当前选择：<span id="curDate">明天</span> <span id="curHour">20</span>:<span id="curMin">00</span>
+      </div>
+    </div>
+    <div class="big-popup-bottombar">
+      <button class="btn-mini btn-yellow" onclick="history.back()">取消</button>
+      <button class="btn-mini btn-green" onclick="alert('已保存')">确认修改</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/shell.js?v=33"></script>
+<script>
+renderSidebar('mine');
+renderTopRow({ showFilter: false, showSort: false, showSearch: false });
+
+// 简易 picker
+const dates = ['今天','明天','后天','大后天','5月28日','5月29日','5月30日'];
+const hours = Array.from({length:24}, (_,i) => String(i).padStart(2,'0'));
+const minutes = Array.from({length:60}, (_,i) => String(i).padStart(2,'0'));
+
+function buildCol(col, items, defaultIdx) {
+  const wrap = document.querySelector(`.picker-col[data-col="${col}"]`);
+  wrap.innerHTML = items.map((t,i) => `<div class="picker-item ${i===defaultIdx?'active':''}" data-i="${i}">${t}</div>`).join('');
+  wrap.scrollTop = defaultIdx * 56 - 56*2;
+  let timer;
+  wrap.addEventListener('scroll', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const idx = Math.round(wrap.scrollTop / 56) + 2;
+      wrap.querySelectorAll('.picker-item').forEach((el,i) => el.classList.toggle('active', i===idx));
+      const txt = items[idx] ?? '';
+      if (col === 'date')   document.getElementById('curDate').textContent = txt;
+      if (col === 'hour')   document.getElementById('curHour').textContent = txt;
+      if (col === 'minute') document.getElementById('curMin').textContent = txt;
+    }, 80);
+  });
+}
+
+buildCol('date',   dates,   1);
+buildCol('hour',   hours,   20);
+buildCol('minute', minutes, 0);
+</script>
+</body>
+</html>

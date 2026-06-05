@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, initial-scale=1">
+  <title>消息中心 · 代号Life</title>
+  <link rel="stylesheet" href="assets/global.css">
+  <link rel="stylesheet" href="assets/components.css">
+  <link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="top-row"></header>
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <div class="paper-board paper-board--message">
+
+      <div class="center-tabs" id="msgTabs">
+        <span class="center-tab active" data-tab="like">赞赞<span class="tab-badge">99+</span></span>
+        <span class="center-tab" data-tab="comment">评论<span class="tab-badge">2</span></span>
+        <span class="center-tab" data-tab="follow">关注<span class="tab-badge">12</span></span>
+        <span class="center-tab" data-tab="system">系统<span class="tab-badge">24</span></span>
+      </div>
+
+      <div class="cards-wrap">
+        <section class="cards-area" id="cardsArea">
+          <div class="msg-list" id="msgList"></div>
+        </section>
+        <div class="scrollbar" id="scrollbar">
+          <div class="scrollbar-thumb" id="scrollThumb"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="assets/shell.js?v=33"></script>
+<script>
+renderSidebar('message');
+renderTopRow({ showFilter: false, showSort: false, showSearch: false });
+
+const COVER = 'assets/img/card-cover-dream.png';
+const AVATAR = 'assets/img/avatar-demo.png';
+const TITLE_SNIP = '梦境标题支持最十二字';
+
+const data = {
+  like: [
+    { unread: true,  name: '作者昵称七个字', kind: 'like', action: '赞了',     target: `你的家装方案【${TITLE_SNIP}】`, time: '20:49' },
+    { unread: true,  name: '作者昵称七个字', kind: 'like', action: '等8人赞了', target: `你的家装方案【${TITLE_SNIP}】`, time: '昨天 20:49' },
+    { unread: false, name: '作者昵称七个字', kind: 'star', action: '收藏了',   target: `你的家装方案【${TITLE_SNIP}】`, time: '20:49' },
+    { unread: false, name: '作者昵称七个字', kind: 'star', action: '等7人收藏了', target: `你的家装方案【${TITLE_SNIP}】`, time: '昨天 20:49' },
+  ],
+  comment: [
+    { unread: true,  name: '作者昵称七个字', action: '评论了你', text: '哇，这个真的太好玩了，怎么还没火呢？这真是一个令人惊叹的地方，值得推荐给所有人！', time: '20:49',       liked: false },
+    { unread: true,  name: '作者昵称七个字', action: '回复了你', text: '谢谢分享！我也想去看看这个梦境，感觉氛围特别好。',                                   time: '昨天 20:49', liked: true  },
+    { unread: false, name: '作者昵称七个字', action: '评论了你', text: '配色太舒服了，能出个教程吗？',                                                       time: '20:49',       liked: false },
+    { unread: false, name: '作者昵称七个字', action: '评论了你', text: '这个布局很有故事感，喜欢！',                                                         time: '昨天 20:49', liked: true  },
+  ],
+  follow: [
+    { unread: true,  name: '作者昵称七个字', time: '昨天 20:49',  state: 'back'     },
+    { unread: false, name: '作者昵称七个字', time: '昨天 20:49',  state: 'followed' },
+    { unread: false, name: '作者昵称七个字', time: '昨天 20:49',  state: 'back'     },
+  ],
+  system: [
+    { unread: true,  alert: '',               text: `你的【${TITLE_SNIP}】审核成功，已发布`,                         time: '20:49',       btn: { label: '去看看',  tone: 'yellow' } },
+    { unread: true,  alert: '审核失败',        text: `你的【${TITLE_SNIP}】审核失败：请注意修改措辞，重新上传地图`,           time: '20:49',       btn: { label: '去编辑',  tone: 'blue' } },
+    { unread: false, alert: '',               text: `你举报的【${TITLE_SNIP}】举报成功，该梦境已下架`,        time: '20:49',       btn: null },
+    { unread: false, alert: '',               text: '举报成功【玩家昵称】在【内容标题】的评论，已禁止该玩家的评论功能7天',   time: '20:49',       btn: null },
+    { unread: false, alert: '被举报',          text: `你的【${TITLE_SNIP}】被举报：涉政`,                         time: '20:49',       btn: { label: '去申诉',  tone: 'outline' } },
+    { unread: false, alert: '被举报',          text: `你的【${TITLE_SNIP}】的评论【评论内容…】被举报`,                       time: '20:49',       btn: { label: '去申诉',  tone: 'outline' } },
+    { unread: false, alert: '违规提示',         text: '你的直播间【RP房标题支持最十二字】涉及违规内容，请注意直播环境',           time: '20:49',       btn: null },
+    { unread: false, alert: '',               text: '你预约的【内容标题】直播已取消，去看看其他的吧~',       time: '20:49',       btn: null },
+    { unread: false, alert: '',               text: '恭喜！你的内容【内容标题】被官方推荐上【榜单名称】',     time: '20:49',       btn: { label: '查看详情', tone: 'yellow' } },
+  ],
+};
+
+const tabs = document.querySelectorAll('#msgTabs .center-tab');
+const list = document.getElementById('msgList');
+
+function actionIcon(kind) {
+  if (kind === 'star') return '<img class="msg-action-icon" src="assets/img/icon-star-mini.png" alt="">';
+  return '<img class="msg-action-icon" src="assets/img/like-mini.png" alt="">';
+}
+
+function renderLike(items) {
+  return items.map(it => `
+    <article class="msg-row${it.unread ? ' is-unread' : ''}">
+      ${it.unread ? '<span class="msg-unread-dot" aria-label="未读"></span>' : ''}
+      <div class="msg-av" style="background-image:url(${AVATAR})"></div>
+      <div class="msg-body">
+        <div class="msg-line1">
+          <span class="msg-name">${it.name}</span>
+          ${actionIcon(it.kind)}
+          <span class="msg-action">${it.action}</span>
+        </div>
+        <div class="msg-line2">
+          <span class="msg-desc">${it.target}</span>
+          <span class="msg-time">${it.time}</span>
+        </div>
+      </div>
+      <div class="msg-thumb" style="background-image:url(${COVER})"></div>
+    </article>
+  `).join('');
+}
+
+function renderComment(items) {
+  return items.map(it => `
+    <article class="msg-row msg-row--comment${it.unread ? ' is-unread' : ''}">
+      ${it.unread ? '<span class="msg-unread-dot" aria-label="未读"></span>' : ''}
+      <div class="msg-av" style="background-image:url(${AVATAR})"></div>
+      <div class="msg-body">
+        <div class="msg-line1">
+          <span class="msg-name">${it.name}</span>
+          <span class="msg-action">${it.action}</span>
+        </div>
+        <div class="msg-line2">
+          <span class="msg-comment-text">${it.text}</span>
+          <span class="msg-time">${it.time}</span>
+        </div>
+      </div>
+      <div class="msg-side-actions">
+        <button type="button" class="msg-reply-btn">回复</button>
+        <button type="button" class="msg-like-circle${it.liked ? ' is-liked' : ''}" aria-label="赞"></button>
+      </div>
+      <div class="msg-thumb" style="background-image:url(${COVER})"></div>
+    </article>
+  `).join('');
+}
+
+function renderFollow(items) {
+  return items.map(it => `
+    <article class="msg-row msg-row--follow${it.unread ? ' is-unread' : ''}">
+      ${it.unread ? '<span class="msg-unread-dot" aria-label="未读"></span>' : ''}
+      <div class="msg-av" style="background-image:url(${AVATAR})"></div>
+      <div class="msg-body">
+        <div class="msg-line1">
+          <span class="msg-name">${it.name}</span>
+          <span class="msg-action">关注了你</span>
+        </div>
+        <div class="msg-line2">
+          <span class="msg-time">${it.time}</span>
+        </div>
+      </div>
+      <button type="button" class="msg-follow-btn${it.state === 'followed' ? ' is-followed' : ''}">
+        ${it.state === 'followed' ? '已关注' : '回关'}
+      </button>
+    </article>
+  `).join('');
+}
+
+function renderSystem(items) {
+  return items.map(it => {
+    const alert = it.alert
+      ? `<span class="msg-sys-alert">! ${it.alert}</span>`
+      : '';
+    const btn = it.btn
+      ? `<button type="button" class="msg-sys-btn msg-sys-btn--${it.btn.tone}">${it.btn.label}</button>`
+      : '';
+    return `
+    <article class="msg-row msg-row--system${it.unread ? ' is-unread' : ''}">
+      ${it.unread ? '<span class="msg-unread-dot" aria-label="未读"></span>' : ''}
+      <div class="msg-sys-icon" aria-hidden="true"></div>
+      <div class="msg-body">
+        <div class="msg-line1 msg-line1--system">
+          <span class="msg-sys-label">官方系统消息</span>
+          ${alert}
+        </div>
+        <div class="msg-line2 msg-line2--system">
+          <span class="msg-desc">${it.text}</span>
+          <span class="msg-time">${it.time}</span>
+        </div>
+      </div>
+      ${btn}
+      <div class="msg-thumb" style="background-image:url(${COVER})"></div>
+    </article>`;
+  }).join('');
+}
+
+function render(tab) {
+  const map = {
+    like:    () => renderLike(data.like),
+    comment: () => renderComment(data.comment),
+    follow:  () => renderFollow(data.follow),
+    system:  () => renderSystem(data.system),
+  };
+  list.innerHTML = map[tab]();
+  setTimeout(setupScrollbar, 50);
+}
+
+tabs.forEach(t => {
+  t.onclick = () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    render(t.dataset.tab);
+  };
+});
+
+render('like');
+</script>
+</body>
+</html>

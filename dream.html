@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="assets/viewport-fit.js"></script>
+  <title>时光之镜 · 代号Life</title>
+  <link rel="stylesheet" href="assets/global.css?v=2">
+  <link rel="stylesheet" href="assets/components.css?v=121">
+
+</head>
+<body>
+
+<div class="app">
+  <header class="top-row"></header>
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <div class="paper-board">
+      <div class="cards-wrap">
+        <section class="cards-area" id="cardsArea">
+          <div class="cards-grid" id="grid"></div>
+        </section>
+        <div class="scrollbar" id="scrollbar">
+          <div class="scrollbar-thumb" id="scrollThumb"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/shell.js?v=42"></script>
+<script src="assets/detail-popup.js?v=66"></script>
+<script>
+renderSidebar('dream');
+renderTopRow({ showFilter: true, showSort: true, showSearch: true, sortLabel: '最新排序' });
+
+// 时光之镜的排序：综合 / 最新 / 最热 / 游玩人数
+buildSortPanel([
+  { label: '综合' },
+  { label: '最新' },
+  { label: '最热' },
+  { label: '游玩人数' },
+], '最新');
+
+// 仅梦境卡片
+setupPagedCardGrid({
+  grid: document.getElementById('grid'),
+  items: makeDreamCards(36),
+});
+setupScrollbar();
+
+/* 时光之镜筛选弹窗：可加入 + 玩法（多选）+ 游玩人数（多选）*/
+window.openFilter = function() {
+  const mask = document.createElement('div');
+  mask.className = 'modal-mask';
+  mask.innerHTML = `
+    <div class="modal-popup" onclick="event.stopPropagation()">
+      <div class="modal-close"><img src="assets/img/btn-close.png" alt="关闭"></div>
+      <div class="modal-header">
+        <img class="ic" src="assets/img/btn-filter-active.png" alt=""> 筛选
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-options" style="grid-template-columns: 1fr;">
+          <div class="filter-option active">
+            <span class="radio"></span>
+            <span>可加入</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-label-row">
+          <div class="filter-label">玩法（可多选）</div>
+        </div>
+        <div class="filter-options">
+          <div class="filter-option"><span class="radio"></span><span>玩法类型</span></div>
+          <div class="filter-option active"><span class="radio"></span><span>玩法类型</span></div>
+          <div class="filter-option"><span class="radio"></span><span>玩法类型</span></div>
+          <div class="filter-option"><span class="radio"></span><span>玩法类型</span></div>
+          <div class="filter-option"><span class="radio"></span><span>玩法类型</span></div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-label-row">
+          <div class="filter-label">游玩人数（可多选）</div>
+        </div>
+        <div class="filter-options">
+          <div class="filter-option active"><span class="radio"></span><span>单人</span></div>
+          <div class="filter-option active"><span class="radio"></span><span>双人</span></div>
+          <div class="filter-option"><span class="radio"></span><span>3-6人</span></div>
+          <div class="filter-option"><span class="radio"></span><span>6人以上</span></div>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-pill btn-reset">重置</button>
+        <button class="btn-pill btn-confirm">确认</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(mask);
+
+  const fb = document.getElementById('filterBtn');
+  function close() { mask.remove(); }
+
+  mask.onclick = close;
+  mask.querySelector('.modal-close').onclick = close;
+  mask.querySelectorAll('.filter-option').forEach(opt => {
+    opt.onclick = () => {
+      opt.classList.toggle('active');
+      if (fb) fb.querySelector('img').src = 'assets/img/btn-filter-active.png';
+    };
+  });
+  mask.querySelector('.btn-reset').onclick = () => {
+    mask.querySelectorAll('.filter-option').forEach(o => o.classList.remove('active'));
+    if (fb) fb.querySelector('img').src = 'assets/img/btn-filter-default.png';
+  };
+  mask.querySelector('.btn-confirm').onclick = close;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="assets/viewport-fit.js"></script>
+  <title>TA 的主页 · 代号Life</title>
+  <link rel="stylesheet" href="assets/global.css?v=2">
+  <link rel="stylesheet" href="assets/components.css?v=121">
+  <link rel="stylesheet" href="assets/pages.css?v=5">
+</head>
+<body class="guest-profile-page">
+<div class="app guest-profile-app">
+  <header class="search-page-top guest-profile-top">
+    <div class="search-page-title guest-profile-title">
+      <span class="ic"><img src="assets/img/icon-people.png" alt=""></span>
+      <span>ta的主页</span>
+    </div>
+    <button class="topbar-btn btn-close search-back-btn" type="button" onclick="history.back()" title="返回">
+      <img src="assets/img/search-back.png" alt="返回">
+    </button>
+  </header>
+
+  <main class="search-page-main">
+    <div class="search-page-board guest-profile-board">
+      <div class="cards-wrap">
+        <section class="cards-area guest-profile-scroll" id="cardsArea">
+          <section class="profile-card guest-profile-card">
+            <div class="profile-avatar"></div>
+            <div class="profile-info">
+              <div class="profile-head">
+                <h1 class="profile-name">玩家昵称七个字</h1>
+              </div>
+              <div class="profile-stats guest-profile-stats">
+                <div class="item is-static"><div class="num">9999</div><div class="label">获赞</div></div>
+                <div class="item is-static"><div class="num">20.7w</div><div class="label">收藏</div></div>
+                <div class="item is-static"><div class="num">1503.2w</div><div class="label">游玩</div></div>
+                <span class="sep"></span>
+                <div class="item is-static"><div class="num">9999</div><div class="label">关注</div></div>
+                <div class="item is-static"><div class="num">9999</div><div class="label">互关</div></div>
+                <div class="item is-static"><div class="num">9999</div><div class="label">粉丝</div></div>
+              </div>
+            </div>
+            <button class="guest-follow-btn" id="guestFollowBtn" type="button">关注</button>
+            <img class="guest-profile-deco" src="assets/img/deco-owl-flower.png" alt="">
+          </section>
+
+          <div class="center-tabs guest-profile-tabs" id="guestTabs">
+            <span class="center-tab active" data-tab="dream">家装方案</span>
+            <span class="center-tab" data-tab="live">直播间<span class="red-dot"></span></span>
+            <span class="center-tab" data-tab="fav">收藏</span>
+          </div>
+
+          <div class="guest-tab-pane" id="guestTabPane">
+            <div class="mine-tab-body" id="tabContent"></div>
+          </div>
+        </section>
+        <div class="scrollbar" id="scrollbar">
+          <div class="scrollbar-thumb" id="scrollThumb"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/shell.js?v=42"></script>
+<script src="assets/detail-popup.js?v=66"></script>
+<script>
+const tabContent = document.getElementById('tabContent');
+const cardsArea = document.getElementById('cardsArea');
+const tabState = {
+  dream: { scrollTop: 0 },
+  live: { scrollTop: 0 },
+  fav: { scrollTop: 0 },
+};
+let currentTab = 'dream';
+
+function guestDreamCard(item) {
+  return `
+    <article class="card">
+      <span class="card-tag-featured">精选</span>
+      <div class="card-cover" style="background-image:url(${item.cover})">
+        <span class="card-tag-left">玩法标签</span>
+        <div class="card-stats">
+          <span class="stat">在线人数9999</span>
+          <span class="stat-right"><span class="stat"><img src="assets/img/stat-people.png" alt="">0/6</span></span>
+        </div>
+      </div>
+      <div class="card-title-bar">
+        <span class="avatar"></span>
+        <span class="title">${item.title}</span>
+      </div>
+    </article>`;
+}
+
+function guestHistoryCard(item) {
+  return `
+    <article class="card card--guest-live">
+      <span class="card-tag-featured">精选</span>
+      <div class="card-cover" style="background-image:url(${item.cover})">
+        <span class="card-tag-left">玩法标签</span>
+        <span class="time-on-cover">${item.time}</span>
+        <div class="card-stats">
+          <span></span>
+          <span class="stat-right"><span class="stat"><img src="assets/img/stat-people.png" alt="">${item.viewers}</span></span>
+        </div>
+      </div>
+      <div class="card-title-bar">
+        <span class="avatar"></span>
+        <span class="title">直播标题最长支持十二个字</span>
+      </div>
+    </article>`;
+}
+
+function renderDream() {
+  const items = Array.from({ length: 18 }, (_, index) => ({
+    cover: 'assets/img/card-cover-dream.png',
+    title: index % 3 === 0 ? '家装方案标题最长支持十二个字' : ['沉静的午后', '山野茶屋', '童年阁楼'][index % 3],
+  }));
+  tabContent.innerHTML = `<div class="cards-grid">${items.map(guestDreamCard).join('')}</div>`;
+}
+
+function renderLive() {
+  const history = Array.from({ length: 15 }, (_, index) => ({
+    cover: 'assets/img/card-cover-live.png',
+    time: `2026-02-${String(28 - index % 9).padStart(2, '0')} 11:00 - 18:00 (UTC+8)`,
+    viewers: 6 + index % 4,
+  }));
+  tabContent.innerHTML = `
+    <div class="next-live-bar guest-next-live">
+      <div class="next-live-bar__icon" aria-hidden="true"></div>
+      <div class="next-live-bar__main">
+        <div class="next-live-bar__row">
+          <span class="next-live-bar__label">下次开播</span>
+          <span class="next-live-bar__time">2026.08.13 23:00</span>
+        </div>
+        <div class="next-live-bar__sub">订阅 99.2w</div>
+      </div>
+      <button class="guest-subscribe-btn" id="guestSubscribeBtn" type="button">订阅</button>
+    </div>
+    <div class="mine-section">
+      <h3 class="mine-section__title"><span class="name">历史直播</span><span class="count">28场</span></h3>
+      <div class="cards-grid">${history.map(guestHistoryCard).join('')}</div>
+    </div>`;
+
+  document.getElementById('guestSubscribeBtn').onclick = event => {
+    const button = event.currentTarget;
+    const subscribed = button.classList.toggle('is-subscribed');
+    button.textContent = subscribed ? '已订阅' : '订阅';
+    showPageToast(subscribed ? '您已订阅' : '您已取消订阅');
+  };
+}
+
+function renderFav() {
+  tabContent.innerHTML = `<div class="cards-grid">${makeMixedCards(30).map(renderCard).join('')}</div>`;
+}
+
+const renderers = { dream: renderDream, live: renderLive, fav: renderFav };
+document.querySelectorAll('#guestTabs .center-tab').forEach(tab => {
+  tab.onclick = () => {
+    if (tab.dataset.tab === currentTab) return;
+    currentTab = tab.dataset.tab;
+    document.querySelectorAll('#guestTabs .center-tab').forEach(item => {
+      item.classList.toggle('active', item === tab);
+    });
+    renderers[currentTab]();
+    cardsArea.scrollTop = tabState[currentTab].scrollTop;
+    requestAnimationFrame(() => {
+      cardsArea.scrollTop = tabState[currentTab].scrollTop;
+      refreshGuestScroll();
+    });
+  };
+});
+
+cardsArea.addEventListener('scroll', () => {
+  tabState[currentTab].scrollTop = cardsArea.scrollTop;
+}, { passive: true });
+
+document.getElementById('guestFollowBtn').onclick = event => {
+  const button = event.currentTarget;
+  const followed = button.classList.toggle('is-followed');
+  button.textContent = followed ? '已关注' : '关注';
+  showPageToast(followed ? '已成功关注～' : '已成功取消关注');
+};
+
+function setupGuestTabClip() {
+  const pane = document.getElementById('guestTabPane');
+  const tabs = document.getElementById('guestTabs');
+  if (!cardsArea || !pane || !tabs) return () => {};
+
+  const CLIP_OFFSET = 28;
+  let clipStart = 0;
+
+  function measure() {
+    clipStart = pane.offsetTop - tabs.offsetHeight;
+  }
+
+  function paintClip() {
+    const raw = cardsArea.scrollTop - clipStart;
+    const cut = raw <= 0 ? 0 : Math.ceil(raw) + CLIP_OFFSET;
+    pane.style.clipPath = cut > 0 ? `inset(${cut}px 0 0 0)` : 'none';
+  }
+
+  function sync() {
+    measure();
+    paintClip();
+  }
+
+  cardsArea.addEventListener('scroll', paintClip, { passive: true });
+  window.addEventListener('resize', sync);
+  sync();
+  return sync;
+}
+
+const syncGuestTabClip = setupGuestTabClip();
+
+function refreshGuestScroll() {
+  setupScrollbar();
+  syncGuestTabClip();
+}
+
+renderDream();
+setTimeout(refreshGuestScroll, 50);
+</script>
+</body>
+</html>
